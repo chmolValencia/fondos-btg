@@ -22,4 +22,6 @@ public class TransaccionService {
         transaccion.setFecha(java.time.LocalDateTime.now());
         return transaccionRepository.save(transaccion);
     }
+
+
 }
