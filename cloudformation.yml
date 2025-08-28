@@ -1,0 +1,59 @@
+
+---
+
+## ✅ **2. `cloudformation.yml` – Despliegue en AWS (Nivel Senior)**
+
+### 📍 **Dónde crearlo**: En la **raíz del proyecto** (`fondos-btg/cloudformation.yml`)
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Despliegue del backend de Fondos BTG Pactual'
+
+Resources:
+  # Grupo de seguridad para permitir tráfico
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permitir HTTP y MongoDB
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 27017
+          ToPort: 27017
+          CidrIp: 0.0.0.0/0
+
+  # Instancia EC2 con backend + MongoDB
+  BackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0c55b159cbfafe1f0  # Amazon Linux 2
+      InstanceType: t3.medium
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      KeyName: btg-key-pair
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install -y docker git
+          service docker start
+          usermod -a -G docker ec2-user
+
+          # Clonar el repositorio
+          git clone https://github.com/tuusuario/fondos-btg.git
+          cd fondos-btg
+
+          # Iniciar MongoDB
+          docker run -d -p 27017:27017 mongo:latest
+
+          # Ejecutar la app
+          ./mvnw spring-boot:run > app.log 2>&1 &
+
+Outputs:
+  URLBackend:
+    Description: URL del backend
+    Value: !Sub "http://${BackendInstance.PublicDnsName}:8080"
+    Export:
+      Name: BackendURL
