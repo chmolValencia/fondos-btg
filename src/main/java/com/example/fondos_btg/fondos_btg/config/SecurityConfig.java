@@ -24,16 +24,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf(csrf -> csrf.disable()) // Forma recomendada
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/login", "/api/fondos").permitAll() // Permitir acceso a login y listado
-                        .requestMatchers("/api/fondos/**").authenticated() // El resto requiere autenticación
-                )
-                .sessionManagement(session -> session
+                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/api/fondos").permitAll()
+                        .requestMatchers("/api/fondos/historial/**").permitAll() // permite historial sin token
+                        .requestMatchers("/api/fondos/**").authenticated()
+                ).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        // Añadir filtro JWT antes del filtro de autenticación
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -45,8 +45,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

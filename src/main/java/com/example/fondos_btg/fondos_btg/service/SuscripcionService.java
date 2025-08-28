@@ -98,7 +98,7 @@ public class SuscripcionService {
         transaccion.setFecha(LocalDateTime.now());
         transaccion.setMonto(monto);
         transaccion.setDetalle("Suscripción al fondo: " + fondo.getNombre());
-        transaccionService.registrarTransaccion(transaccion);
+        transaccionService.obtenerHistorial(clienteId);
 
         // Enviar notificación
         notificacionService.enviarNotificacion(clienteId, fondo, "suscripción");
@@ -137,7 +137,7 @@ public class SuscripcionService {
         transaccion.setFecha(LocalDateTime.now());
         transaccion.setMonto(suscripcion.getMontoInicial());
         transaccion.setDetalle("Cancelación del fondo: " + fondo.getNombre());
-        transaccionService.registrarTransaccion(transaccion);
+        transaccionService.obtenerHistorial(clienteId);
 
         // Notificar
         if (fondoOpt.isPresent()) {

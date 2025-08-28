@@ -80,15 +80,8 @@ public class FondoController {
 
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/historial/{clienteId}")
-    public ResponseEntity<List<Transaccion>> historial(@PathVariable String clienteId) {
-        // ✅ Validar que el cliente autenticado solo vea su historial
-        String clienteAutenticado = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!clienteAutenticado.equals(clienteId)) {
-            return ResponseEntity.status(403).build();
-        }
-
-        List<Transaccion> historial = transaccionService.obtenerHistorial(clienteId);
-        return ResponseEntity.ok(historial);
+    public List<Transaccion> getHistorial(@PathVariable String clienteId) {
+        return transaccionService.obtenerHistorial(clienteId);
     }
 
 
